@@ -17,4 +17,17 @@ export const getExpensiveProducts = () => api.get('/products/expensive');
 
 export const getCategories = () => api.get('/categories');
 
+export const createCategory = async (categoryData: {
+  name: string;
+  description?: string;
+}) => {
+  try {
+    const response = await api.post('/categories', categoryData);
+    return response;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error; // Esto permite manejar el error en el componente
+  }
+};
+
 export default api;

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { getProducts, deleteProduct, getProductsByCategory, getOutOfStockProducts, getExpensiveProducts , getCategories } from '../services/api';
+import { getProducts, deleteProduct, getProductsByCategory, getOutOfStockProducts, getExpensiveProducts , getCategories } from '../services/api.ts';
 import { Product } from '../types';
 import { useNavigate } from 'react-router-dom';
-
+import { Link } from 'react-router-dom';
 const ProductList: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -171,6 +171,12 @@ const ProductList: React.FC = () => {
               <button className="btn btn-secondary" onClick={clearFilters}>
                 Clear
               </button>
+              <div className="d-flex justify-content-between mb-3">
+                <h2>Lista de Productos</h2>
+                <Link to="/add-category" className="btn btn-success">
+                 + Agregar Categoría
+                </Link>
+              </div>
             </div>
           </div>
         </div>
