@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { getProducts, deleteProduct, getProductsByCategory, getOutOfStockProducts, getExpensiveProducts , getCategories } from '../services/api.ts';
+import { getProducts, deleteProduct, getProductsByCategory, /* getOutOfStockProducts, getExpensiveProducts, */ getCategories } from '../services/api.ts';
 import { Product } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+
 const ProductList: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -13,20 +14,18 @@ const ProductList: React.FC = () => {
     inStock: ''
   });
   const navigate = useNavigate();
-  
 
-    useEffect(() => {
+  useEffect(() => {
     const fetchData = async () => {
       try {
-        // Carga productos y categorías en paralelo
         const [productsRes, categoriesRes] = await Promise.all([
           getProducts(),
-          getCategories() // Ahora debería funcionar
+          getCategories()
         ]);
         setProducts(productsRes.data);
         setCategories(categoriesRes.data);
       } catch (error) {
-        console.error("Error loading data:", error);
+        console.error("Error cargando datos:", error);
       }
     };
     fetchData();
@@ -37,25 +36,18 @@ const ProductList: React.FC = () => {
       const response = await getProducts(customFilters);
       setProducts(response.data);
     } catch (error) {
-      console.error('Error fetching products:', error);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const response = await getCategories ();
-      setCategories(response.data);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error('Error obteniendo productos:', error);
     }
   };
 
   const handleDelete = async (id: number) => {
-    try {
-      await deleteProduct(id);
-      fetchProducts();
-    } catch (error) {
-      console.error('Error deleting product:', error);
+    if (window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+      try {
+        await deleteProduct(id);
+        fetchProducts();
+      } catch (error) {
+        console.error('Error eliminando producto:', error);
+      }
     }
   };
 
@@ -65,7 +57,14 @@ const ProductList: React.FC = () => {
   };
 
   const applyFilters = () => {
-    fetchProducts(filters);
+    const filterParams: any = {};
+    
+    if (filters.category) filterParams.category = filters.category;
+    if (filters.minPrice) filterParams.minPrice = filters.minPrice;
+    if (filters.maxPrice) filterParams.maxPrice = filters.maxPrice;
+    if (filters.inStock) filterParams.inStock = filters.inStock === 'true';
+    
+    fetchProducts(filterParams);
   };
 
   const clearFilters = () => {
@@ -88,42 +87,49 @@ const ProductList: React.FC = () => {
             setProducts(response.data);
           }
           break;
-        case 'outOfStock':
+/*         case 'outOfStock':
           response = await getOutOfStockProducts();
           setProducts(response.data);
           break;
         case 'expensive':
           response = await getExpensiveProducts();
           setProducts(response.data);
-          break;
+          break; */
         default:
           fetchProducts();
       }
     } catch (error) {
-      console.error('Error executing special query:', error);
+      console.error('Error ejecutando consulta especial:', error);
     }
   };
 
   return (
-    <div className="container mt-4">
-      <h2>Product List</h2>
-      
-      {/* Filter Section */}
-      <div className="card mb-4">
-        <div className="card-header">
-          <h5>Filters</h5>
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-800">Lista de Productos</h1>
+          <Link 
+            to="/add-category" 
+            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            + Agregar Categoría
+          </Link>
         </div>
-        <div className="card-body">
-          <div className="row">
-            <div className="col-md-3">
-              <label>Category</label>
+
+        {/* Filtros */}
+        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">Filtros</h2>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">Categoría</label>
               <select
                 name="category"
-                className="form-control"
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 value={filters.category}
                 onChange={handleFilterChange}
               >
-                <option value="">All Categories</option>
+                <option value="">Todas las Categorías</option>
                 {categories.map(category => (
                   <option key={category.id} value={category.id}>
                     {category.name}
@@ -131,129 +137,163 @@ const ProductList: React.FC = () => {
                 ))}
               </select>
             </div>
-            <div className="col-md-2">
-              <label>Min Price</label>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">Precio Mín</label>
               <input
                 type="number"
                 name="minPrice"
-                className="form-control"
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 value={filters.minPrice}
                 onChange={handleFilterChange}
+                placeholder="0"
               />
             </div>
-            <div className="col-md-2">
-              <label>Max Price</label>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">Precio Máx</label>
               <input
                 type="number"
                 name="maxPrice"
-                className="form-control"
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 value={filters.maxPrice}
                 onChange={handleFilterChange}
+                placeholder="999"
               />
             </div>
-            <div className="col-md-2">
-              <label>In Stock</label>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">En Stock</label>
               <select
                 name="inStock"
-                className="form-control"
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 value={filters.inStock}
                 onChange={handleFilterChange}
               >
-                <option value="">All</option>
-                <option value="true">Yes</option>
+                <option value="">Todos</option>
+                <option value="true">Sí</option>
                 <option value="false">No</option>
               </select>
             </div>
-            <div className="col-md-3 d-flex align-items-end">
-              <button className="btn btn-primary me-2" onClick={applyFilters}>
-                Apply Filters
+            <div className="flex items-end gap-2">
+              <button 
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
+                onClick={applyFilters}
+              >
+                Aplicar
               </button>
-              <button className="btn btn-secondary" onClick={clearFilters}>
-                Clear
+              <button 
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors"
+                onClick={clearFilters}
+              >
+                Limpiar
               </button>
-              <div className="d-flex justify-content-between mb-3">
-                <h2>Lista de Productos</h2>
-                <Link to="/add-category" className="btn btn-success">
-                 + Agregar Categoría
-                </Link>
-              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Special Query Buttons */}
-      <div className="mb-4">
-        <h5>Special Queries</h5>
-        <div className="d-flex gap-2">
+        {/* Consultas Especiales */}
+        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">Consultas Especiales</h2>
+          <div className="flex flex-wrap gap-3">
+            <button 
+              className={`px-4 py-2 rounded-md transition-colors ${
+                filters.category 
+                  ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+              onClick={() => handleSpecialQuery('byCategory')}
+              disabled={!filters.category}
+            >
+              Productos por Categoría Seleccionada
+            </button>
+            <button 
+              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition-colors"
+              onClick={() => handleSpecialQuery('outOfStock')}
+            >
+              Productos Sin Stock
+            </button>
+            <button 
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors"
+              onClick={() => handleSpecialQuery('expensive')}
+            >
+              Productos Caros (Mayor a $100)
+            </button>
+            <button 
+              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors"
+              onClick={() => fetchProducts()}
+            >
+              Mostrar Todos
+            </button>
+          </div>
+        </div>
+
+        {/* Tabla de Productos */}
+        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {products.map(product => (
+                  <tr key={product.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{product.description}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.price.toFixed(2)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        product.stock > 0 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {product.stock}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.category?.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                      <button 
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs transition-colors"
+                        onClick={() => navigate(`/edit-product/${product.id}`)}
+                      >
+                        Editar
+                      </button>
+                      <button 
+                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs transition-colors"
+                        onClick={() => handleDelete(product.id)}
+                      >
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          {products.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              No se encontraron productos
+            </div>
+          )}
+        </div>
+
+        {/* Botón Agregar Producto */}
+        <div className="mt-6">
           <button 
-            className="btn btn-info" 
-            onClick={() => handleSpecialQuery('byCategory')}
-            disabled={!filters.category}
+            className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            onClick={() => navigate('/add-product')}
           >
-            Products by Selected Category
-          </button>
-          <button 
-            className="btn btn-warning" 
-            onClick={() => handleSpecialQuery('outOfStock')}
-          >
-            Out of Stock Products
-          </button>
-          <button 
-            className="btn btn-danger" 
-            onClick={() => handleSpecialQuery('expensive')}
-          >
-            Expensive Products (&gt; $100)
+            + Agregar Nuevo Producto
           </button>
         </div>
       </div>
-
-      {/* Product Table */}
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>Category</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map(product => (
-            <tr key={product.id}>
-              <td>{product.id}</td>
-              <td>{product.name}</td>
-              <td>{product.description}</td>
-              <td>${product.price.toFixed(2)}</td>
-              <td>{product.stock}</td>
-              <td>{product.category?.name}</td>
-              <td>
-                <button 
-                  className="btn btn-sm btn-primary me-1"
-                  onClick={() => navigate(`/edit-product/${product.id}`)}
-                >
-                  Edit
-                </button>
-                <button 
-                  className="btn btn-sm btn-danger"
-                  onClick={() => handleDelete(product.id)}
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <button 
-        className="btn btn-success mt-3"
-        onClick={() => navigate('/add-product')}
-      >
-        Add New Product
-      </button>
     </div>
   );
 };

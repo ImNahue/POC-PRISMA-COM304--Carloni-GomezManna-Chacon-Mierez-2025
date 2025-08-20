@@ -12,9 +12,14 @@ export const deleteProduct = (id: number) => api.delete(`/products/${id}`);
 
 // Special queries
 export const getProductsByCategory = (categoryId: number) => api.get(`/products/category/${categoryId}`);
-export const getOutOfStockProducts = () => api.get('/products/out-of-stock');
-export const getExpensiveProducts = () => api.get('/products/expensive');
-
+/* export const getOutOfStockProducts = (categoryId: number) => {
+  return axios.get(`/products/out-of-stock${categoryId}`);
+  return axios.get(`/products?inStock=false${categoryId}`);
+};
+export const getExpensiveProducts = (categoryId: number) => {
+  return axios.get(`/products/expensive${categoryId}`);
+  return axios.get(`/products?minPrice=100${categoryId}`);
+}; */
 export const getCategories = () => api.get('/categories');
 
 export const createCategory = async (categoryData: {

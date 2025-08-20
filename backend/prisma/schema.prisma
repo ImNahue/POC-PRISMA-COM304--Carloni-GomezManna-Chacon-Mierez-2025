@@ -7,23 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Category {
+model category {
   id          Int       @id @default(autoincrement())
   name        String
   description String?
-  products    Product[]
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  updatedAt   DateTime
+  product     product[]
 }
 
-model Product {
+model product {
   id          Int      @id @default(autoincrement())
   name        String
   description String?
   price       Float
   stock       Int
-  category    Category @relation(fields: [categoryId], references: [id])
   categoryId  Int
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime
+  category    category @relation(fields: [categoryId], references: [id], map: "Product_categoryId_fkey")
+
+  @@index([categoryId], map: "Product_categoryId_fkey")
 }

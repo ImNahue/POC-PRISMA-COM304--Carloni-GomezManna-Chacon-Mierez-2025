@@ -27,8 +27,7 @@ const CategoryForm: React.FC = () => {
     try {
       const response = await createCategory(formData);
       if (response.status === 201) {
-        navigate('/'); // Redirige al home
-        // O usa navigate(-1) para volver atrás
+        navigate('/');
       }
     } catch (err) {
       setError('Error al crear la categoría. Por favor intenta nuevamente.');
@@ -39,59 +38,72 @@ const CategoryForm: React.FC = () => {
   };
 
   return (
-    <div className="container mt-4">
-      <h2>Crear Nueva Categoría</h2>
-      
-      {error && (
-        <div className="alert alert-danger">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label">Nombre *</label>
-          <input
-            type="text"
-            className="form-control"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            disabled={isSubmitting}
-          />
-        </div>
-        
-        <div className="mb-3">
-          <label className="form-label">Descripción</label>
-          <textarea
-            className="form-control"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            disabled={isSubmitting}
-          />
-        </div>
-        
-        <div className="d-flex gap-2">
-          <button 
-            type="submit" 
-            className="btn btn-primary"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Creando...' : 'Crear Categoría'}
-          </button>
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">
+            Crear Nueva Categoría
+          </h1>
           
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => navigate(-1)} // Vuelve atrás
-            disabled={isSubmitting}
-          >
-            Cancelar
-          </button>
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nombre *
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                disabled={isSubmitting}
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                placeholder="Ingresa el nombre de la categoría"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Descripción
+              </label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                disabled={isSubmitting}
+                rows={4}
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                placeholder="Describe la categoría..."
+              />
+            </div>
+            
+            <div className="flex gap-4 pt-4">
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white py-3 px-6 rounded-md font-medium transition-colors"
+              >
+                {isSubmitting ? 'Creando...' : 'Crear Categoría'}
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                disabled={isSubmitting}
+                className="flex-1 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300 text-white py-3 px-6 rounded-md font-medium transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   );
 };

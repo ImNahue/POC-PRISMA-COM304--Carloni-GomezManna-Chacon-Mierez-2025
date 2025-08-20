@@ -3,11 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getProductById, createProduct, updateProduct, getCategories } from '../services/api.ts';
 import { Product } from '../types';
 
-
 const ProductForm: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [product, setProduct] = useState<Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'category'>>({ 
     name: '',
     description: '',
@@ -32,7 +32,7 @@ const ProductForm: React.FC = () => {
         setProduct(prev => ({ ...prev, categoryId: response.data[0].id }));
       }
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error('Error obteniendo categorías:', error);
     }
   };
 
@@ -47,7 +47,7 @@ const ProductForm: React.FC = () => {
         categoryId: response.data.categoryId
       });
     } catch (error) {
-      console.error('Error fetching product:', error);
+      console.error('Error obteniendo producto:', error);
     }
   };
 
@@ -61,6 +61,7 @@ const ProductForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       if (id) {
         await updateProduct(parseInt(id), product);
@@ -69,87 +70,124 @@ const ProductForm: React.FC = () => {
       }
       navigate('/');
     } catch (error) {
-      console.error('Error saving product:', error);
+      console.error('Error guardando producto:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container mt-4">
-      <h2>{id ? 'Edit Product' : 'Add New Product'}</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label">Name</label>
-          <input
-            type="text"
-            className="form-control"
-            name="name"
-            value={product.name}
-            onChange={handleChange}
-            required
-          />
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">
+            {id ? 'Editar Producto' : 'Agregar Nuevo Producto'}
+          </h1>
+          
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nombre *
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={product.name}
+                onChange={handleChange}
+                required
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Ingresa el nombre del producto"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Descripción
+              </label>
+              <textarea
+                name="description"
+                value={product.description}
+                onChange={handleChange}
+                rows={4}
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Describe el producto..."
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Precio *
+                </label>
+                <input
+                  type="number"
+                  name="price"
+                  value={product.price}
+                  onChange={handleChange}
+                  step="0.01"
+                  min="0"
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="0.00"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Stock *
+                </label>
+                <input
+                  type="number"
+                  name="stock"
+                  value={product.stock}
+                  onChange={handleChange}
+                  min="0"
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Categoría *
+              </label>
+              <select
+                name="categoryId"
+                value={product.categoryId}
+                onChange={handleChange}
+                required
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Selecciona una categoría</option>
+                {categories.map(category => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex gap-4 pt-4">
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="flex-1 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white py-3 px-6 rounded-md font-medium transition-colors"
+              >
+                {loading ? 'Guardando...' : (id ? 'Actualizar' : 'Crear')}
+              </button>
+              <button 
+                type="button" 
+                onClick={() => navigate('/')}
+                className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-md font-medium transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
         </div>
-        <div className="mb-3">
-          <label className="form-label">Description</label>
-          <textarea
-            className="form-control"
-            name="description"
-            value={product.description}
-            onChange={handleChange}
-            rows={3}
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Price</label>
-          <input
-            type="number"
-            className="form-control"
-            name="price"
-            value={product.price}
-            onChange={handleChange}
-            step="0.01"
-            min="0"
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Stock</label>
-          <input
-            type="number"
-            className="form-control"
-            name="stock"
-            value={product.stock}
-            onChange={handleChange}
-            min="0"
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Category</label>
-          <select
-            className="form-control"
-            name="categoryId"
-            value={product.categoryId}
-            onChange={handleChange}
-            required
-          >
-            {categories.map(category => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button type="submit" className="btn btn-primary">
-          {id ? 'Update' : 'Create'}
-        </button>
-        <button 
-          type="button" 
-          className="btn btn-secondary ms-2"
-          onClick={() => navigate('/')}
-        >
-          Cancel
-        </button>
-      </form>
+      </div>
     </div>
   );
 };
