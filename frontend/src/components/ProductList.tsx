@@ -169,7 +169,7 @@ const ProductList: React.FC = () => {
               >
                 <option value="">Todos</option>
                 <option value="true">Sí</option>
-                <option value="false">No</option>
+                {/* <option value="false">No</option> */}
               </select>
             </div>
             <div className="flex items-end gap-2">
@@ -204,18 +204,18 @@ const ProductList: React.FC = () => {
             >
               Productos por Categoría Seleccionada
             </button>
-            <button 
+{/*             <button 
               className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition-colors"
               onClick={() => handleSpecialQuery('outOfStock')}
             >
               Productos Sin Stock
-            </button>
-            <button 
+            </button> */}
+{/*             <button 
               className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors"
               onClick={() => handleSpecialQuery('expensive')}
             >
               Productos Caros (Mayor a $100)
-            </button>
+            </button> */}
             <button 
               className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors"
               onClick={() => fetchProducts()}
