@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getProducts, deleteProduct, getProductsByCategory, /* getOutOfStockProducts, getExpensiveProducts, */ getCategories } from '../services/api.ts';
+import { getProducts, deleteProduct, getProductsByCategory, getCategories } from '../services/api.ts';
 import { Product } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
@@ -58,12 +58,12 @@ const ProductList: React.FC = () => {
 
   const applyFilters = () => {
     const filterParams: any = {};
-    
+
     if (filters.category) filterParams.category = filters.category;
     if (filters.minPrice) filterParams.minPrice = filters.minPrice;
     if (filters.maxPrice) filterParams.maxPrice = filters.maxPrice;
     if (filters.inStock) filterParams.inStock = filters.inStock === 'true';
-    
+
     fetchProducts(filterParams);
   };
 
@@ -87,14 +87,6 @@ const ProductList: React.FC = () => {
             setProducts(response.data);
           }
           break;
-/*         case 'outOfStock':
-          response = await getOutOfStockProducts();
-          setProducts(response.data);
-          break;
-        case 'expensive':
-          response = await getExpensiveProducts();
-          setProducts(response.data);
-          break; */
         default:
           fetchProducts();
       }
@@ -109,23 +101,23 @@ const ProductList: React.FC = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-800">Lista de Productos</h1>
-          <Link 
-            to="/add-category" 
-            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors"
+          <Link
+            to="/add-category"
+            className="btn btn-success"
           >
             + Agregar Categoría
           </Link>
         </div>
 
         {/* Filtros */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+        <div className="card mb-6">
           <h2 className="text-lg font-semibold text-gray-700 mb-4">Filtros</h2>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">Categoría</label>
               <select
                 name="category"
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="input-field"
                 value={filters.category}
                 onChange={handleFilterChange}
               >
@@ -142,7 +134,7 @@ const ProductList: React.FC = () => {
               <input
                 type="number"
                 name="minPrice"
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="input-field"
                 value={filters.minPrice}
                 onChange={handleFilterChange}
                 placeholder="0"
@@ -153,7 +145,7 @@ const ProductList: React.FC = () => {
               <input
                 type="number"
                 name="maxPrice"
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="input-field"
                 value={filters.maxPrice}
                 onChange={handleFilterChange}
                 placeholder="999"
@@ -163,24 +155,23 @@ const ProductList: React.FC = () => {
               <label className="block text-sm font-medium text-gray-600 mb-1">En Stock</label>
               <select
                 name="inStock"
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="input-field"
                 value={filters.inStock}
                 onChange={handleFilterChange}
               >
                 <option value="">Todos</option>
                 <option value="true">Sí</option>
-                {/* <option value="false">No</option> */}
               </select>
             </div>
             <div className="flex items-end gap-2">
-              <button 
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
+              <button
+                className="btn btn-primary"
                 onClick={applyFilters}
               >
                 Aplicar
               </button>
-              <button 
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors"
+              <button
+                className="btn btn-secondary"
                 onClick={clearFilters}
               >
                 Limpiar
@@ -190,34 +181,18 @@ const ProductList: React.FC = () => {
         </div>
 
         {/* Consultas Especiales */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+        <div className="card mb-6">
           <h2 className="text-lg font-semibold text-gray-700 mb-4">Consultas Especiales</h2>
           <div className="flex flex-wrap gap-3">
-            <button 
-              className={`px-4 py-2 rounded-md transition-colors ${
-                filters.category 
-                  ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
+            <button
+              className={`btn ${filters.category ? 'btn-primary' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
               onClick={() => handleSpecialQuery('byCategory')}
               disabled={!filters.category}
             >
               Productos por Categoría Seleccionada
             </button>
-{/*             <button 
-              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition-colors"
-              onClick={() => handleSpecialQuery('outOfStock')}
-            >
-              Productos Sin Stock
-            </button> */}
-{/*             <button 
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors"
-              onClick={() => handleSpecialQuery('expensive')}
-            >
-              Productos Caros (Mayor a $100)
-            </button> */}
-            <button 
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors"
+            <button
+              className="btn btn-secondary"
               onClick={() => fetchProducts()}
             >
               Mostrar Todos
@@ -226,46 +201,46 @@ const ProductList: React.FC = () => {
         </div>
 
         {/* Tabla de Productos */}
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
+        <div className="card overflow-hidden">
+          <div className="table-responsive">
+            <table className="table">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  <th className="table-header">ID</th>
+                  <th className="table-header">Nombre</th>
+                  <th className="table-header">Descripción</th>
+                  <th className="table-header">Precio</th>
+                  <th className="table-header">Stock</th>
+                  <th className="table-header">Categoría</th>
+                  <th className="table-header">Acciones</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {products.map(product => (
-                  <tr key={product.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>
+                  <tr key={product.id} className="table-row">
+                    <td className="table-cell">{product.id}</td>
+                    <td className="table-cell font-medium">{product.name}</td>
                     <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{product.description}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.price.toFixed(2)}</td>
+                    <td className="table-cell">${product.price.toFixed(2)}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        product.stock > 0 
-                          ? 'bg-green-100 text-green-800' 
+                        product.stock > 0
+                          ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       }`}>
                         {product.stock}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.category?.name}</td>
+                    <td className="table-cell text-gray-500">{product.category?.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                      <button 
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs transition-colors"
+                      <button
+                        className="btn btn-primary text-xs px-3 py-1"
                         onClick={() => navigate(`/edit-product/${product.id}`)}
                       >
                         Editar
                       </button>
-                      <button 
-                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs transition-colors"
+                      <button
+                        className="btn btn-danger text-xs px-3 py-1"
                         onClick={() => handleDelete(product.id)}
                       >
                         Eliminar
@@ -276,7 +251,7 @@ const ProductList: React.FC = () => {
               </tbody>
             </table>
           </div>
-          
+
           {products.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               No se encontraron productos
@@ -284,15 +259,14 @@ const ProductList: React.FC = () => {
           )}
         </div>
 
-        {/* Botón Agregar Producto */}
-        <div className="mt-6">
-          <button 
-            className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-            onClick={() => navigate('/add-product')}
-          >
-            + Agregar Nuevo Producto
-          </button>
-        </div>
+        {/* Botón Agregar Producto Flotante */}
+        <button
+          className="btn-floating btn-success"
+          onClick={() => navigate('/add-product')}
+          title="Agregar Nuevo Producto"
+        >
+          +
+        </button>
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ const ProductForm: React.FC = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [product, setProduct] = useState<Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'category'>>({ 
+  const [product, setProduct] = useState<Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'category'>>({
     name: '',
     description: '',
     price: 0,
@@ -18,7 +18,7 @@ const ProductForm: React.FC = () => {
 
   useEffect(() => {
     fetchCategories();
-    
+
     if (id) {
       fetchProduct();
     }
@@ -53,9 +53,9 @@ const ProductForm: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setProduct(prev => ({ 
-      ...prev, 
-      [name]: name === 'price' || name === 'stock' || name === 'categoryId' ? parseFloat(value) || 0 : value 
+    setProduct(prev => ({
+      ...prev,
+      [name]: name === 'price' || name === 'stock' || name === 'categoryId' ? parseFloat(value) || 0 : value
     }));
   };
 
@@ -79,11 +79,11 @@ const ProductForm: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-lg shadow-sm border p-6">
+        <div className="card">
           <h1 className="text-2xl font-bold text-gray-800 mb-6">
             {id ? 'Editar Producto' : 'Agregar Nuevo Producto'}
           </h1>
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -95,7 +95,7 @@ const ProductForm: React.FC = () => {
                 value={product.name}
                 onChange={handleChange}
                 required
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="input-field"
                 placeholder="Ingresa el nombre del producto"
               />
             </div>
@@ -109,7 +109,7 @@ const ProductForm: React.FC = () => {
                 value={product.description}
                 onChange={handleChange}
                 rows={4}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="input-field"
                 placeholder="Describe el producto..."
               />
             </div>
@@ -120,16 +120,14 @@ const ProductForm: React.FC = () => {
                   Precio *
                 </label>
                 <input
-                  type="number"
-                  name="price"
-                  value={product.price}
-                  onChange={handleChange}
-                  step="0.01"
-                  min="0"
-                  required
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="0.00"
-                />
+                type="text"
+                name="price"
+                value={product.price}
+                onChange={handleChange}
+                required
+                className="input-field"
+                placeholder="0.00"
+              />
               </div>
 
               <div>
@@ -137,15 +135,14 @@ const ProductForm: React.FC = () => {
                   Stock *
                 </label>
                 <input
-                  type="number"
-                  name="stock"
-                  value={product.stock}
-                  onChange={handleChange}
-                  min="0"
-                  required
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="0"
-                />
+                type="text"
+                name="stock"
+                value={product.stock}
+                onChange={handleChange}
+                required
+                className="input-field"
+                placeholder="0"
+              />
               </div>
             </div>
 
@@ -158,7 +155,7 @@ const ProductForm: React.FC = () => {
                 value={product.categoryId}
                 onChange={handleChange}
                 required
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="input-field"
               >
                 <option value="">Selecciona una categoría</option>
                 {categories.map(category => (
@@ -170,17 +167,17 @@ const ProductForm: React.FC = () => {
             </div>
 
             <div className="flex gap-4 pt-4">
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={loading}
-                className="flex-1 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white py-3 px-6 rounded-md font-medium transition-colors"
+                className={`btn btn-primary flex-1 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {loading ? 'Guardando...' : (id ? 'Actualizar' : 'Crear')}
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => navigate('/')}
-                className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-md font-medium transition-colors"
+                className="btn btn-secondary flex-1"
               >
                 Cancelar
               </button>
