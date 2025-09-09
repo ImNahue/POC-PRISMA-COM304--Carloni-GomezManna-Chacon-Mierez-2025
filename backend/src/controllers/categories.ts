@@ -17,7 +17,7 @@ export const getCategoryById = async (req: Request, res: Response) => {
   try {
     const category = await prisma.category.findUnique({
       where: { id: parseInt(id) },
-      include: { products: true }
+      include: { product: true }
     });
     res.json(category);
   } catch (error) {
