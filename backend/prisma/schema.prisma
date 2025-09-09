@@ -9,8 +9,8 @@ datasource db {
 }
 
 model category {
-  id          Int       @id @default(autoincrement())
-  name        String
+  id          Int       @id
+  name        String    @unique
   description String?
   createdAt   DateTime  @default(now())
   updatedAt DateTime @updatedAt
@@ -23,10 +23,10 @@ model product {
   description String?
   price       Float
   stock       Int
-  categoryId  Int
+  categoryId  Int?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  category    category @relation(fields: [categoryId], references: [id], map: "Product_categoryId_fkey")
+  category    category? @relation(fields: [categoryId], references: [id], map: "Product_categoryId_fkey")
 
   @@index([categoryId], map: "Product_categoryId_fkey")
 }

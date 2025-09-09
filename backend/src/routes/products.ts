@@ -7,7 +7,8 @@ import {
   deleteProduct,
   getProductsByCategory,
   getOutOfStockProducts,
-  getExpensiveProducts
+  getExpensiveProducts,
+  bulkDeleteProducts
 } from '../controllers/products';
 
 const router = Router();
@@ -22,5 +23,8 @@ router.delete('/:id', deleteProduct);
 router.get('/category/:categoryId', getProductsByCategory);
 router.get('/out-of-stock', getOutOfStockProducts);
 router.get('/expensive', getExpensiveProducts);
+
+// Bulk operations routes
+router.post('/bulk-delete', bulkDeleteProducts);
 
 export default router;

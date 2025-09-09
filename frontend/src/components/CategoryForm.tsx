@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createCategory } from '../services/api.ts';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { createCategory, updateCategory, getCategoryById } from '../services/api.ts';
 
 const CategoryForm: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const isEditing = !!id;
   const [formData, setFormData] = useState({
     name: '',
     description: ''
@@ -10,6 +12,24 @@ const CategoryForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isEditing && id) {
+      const fetchCategory = async () => {
+        try {
+          const response = await getCategoryById(parseInt(id));
+          setFormData({
+            name: response.data.name,
+            description: response.data.description || ''
+          });
+        } catch (err) {
+          setError('Error al cargar la categoría.');
+          console.error('Error:', err);
+        }
+      };
+      fetchCategory();
+    }
+  }, [id, isEditing]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -23,14 +43,19 @@ const CategoryForm: React.FC = () => {
     e.preventDefault();
     setIsSubmitting(true);
     setError('');
-    
+
     try {
-      const response = await createCategory(formData);
-      if (response.status === 201) {
-        navigate('/');
+      if (isEditing && id) {
+        await updateCategory(parseInt(id), formData);
+      } else {
+        const response = await createCategory(formData);
+        if (response.status === 201) {
+          navigate('/categories');
+        }
       }
+      navigate('/categories');
     } catch (err) {
-      setError('Error al crear la categoría. Por favor intenta nuevamente.');
+      setError(`Error al ${isEditing ? 'actualizar' : 'crear'} la categoría. Por favor intenta nuevamente.`);
       console.error('Error:', err);
     } finally {
       setIsSubmitting(false);
@@ -42,7 +67,7 @@ const CategoryForm: React.FC = () => {
       <div className="max-w-2xl mx-auto">
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <h1 className="text-2xl font-bold text-gray-800 mb-6">
-            Crear Nueva Categoría
+            {isEditing ? 'Editar Categoría' : 'Crear Nueva Categoría'}
           </h1>
           
           {error && (
