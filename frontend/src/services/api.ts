@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3000/api',
 });
 
 export const getProducts = (filters = {}) => api.get('/products', { params: filters });
@@ -14,14 +14,6 @@ export const bulkDeleteProducts = (productIds: number[]) => api.post('/products/
 
 // Special queries
 export const getProductsByCategory = (categoryId: number) => api.get(`/products/category/${categoryId}`);
-/* export const getOutOfStockProducts = (categoryId: number) => {
-  return axios.get(`/products/out-of-stock${categoryId}`);
-  return axios.get(`/products?inStock=false${categoryId}`);
-};
-export const getExpensiveProducts = (categoryId: number) => {
-  return axios.get(`/products/expensive${categoryId}`);
-  return axios.get(`/products?minPrice=100${categoryId}`);
-}; */
 export const getCategories = () => api.get('/categories');
 
 export const getCategoryById = (id: number) => api.get(`/categories/${id}`);

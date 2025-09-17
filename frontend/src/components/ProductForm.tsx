@@ -120,13 +120,15 @@ const ProductForm: React.FC = () => {
                   Precio *
                 </label>
                 <input
-                type="text"
+                type="number"
                 name="price"
                 value={product.price}
                 onChange={handleChange}
                 required
                 className="input-field"
                 placeholder="0.00"
+                step="0.01"
+                min="0"
               />
               </div>
 
@@ -135,13 +137,14 @@ const ProductForm: React.FC = () => {
                   Stock *
                 </label>
                 <input
-                type="text"
+                type="number"
                 name="stock"
                 value={product.stock}
                 onChange={handleChange}
                 required
                 className="input-field"
                 placeholder="0"
+                min="0"
               />
               </div>
             </div>

@@ -109,12 +109,12 @@ const CategoryForm: React.FC = () => {
             </div>
             
             <div className="flex gap-4 pt-4">
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={isSubmitting}
                 className="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white py-3 px-6 rounded-md font-medium transition-colors"
               >
-                {isSubmitting ? 'Creando...' : 'Crear Categoría'}
+                {isSubmitting ? (isEditing ? 'Actualizando...' : 'Creando...') : (isEditing ? 'Actualizar Categoría' : 'Crear Categoría')}
               </button>
               
               <button

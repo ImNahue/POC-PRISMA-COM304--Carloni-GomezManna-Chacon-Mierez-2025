@@ -8,7 +8,7 @@ export const getCategories = async (req: Request, res: Response) => {
     const categories = await prisma.category.findMany();
     res.json(categories);
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching categories' });
+    res.status(500).json({ error: 'Error al obtener las categorías' });
   }
 };
 
@@ -21,22 +21,22 @@ export const getCategoryById = async (req: Request, res: Response) => {
     });
     res.json(category);
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching category' });
+    res.status(500).json({ error: 'Error al obtener la categoría' });
   }
 };
 
 export const createCategory = async (req: Request, res: Response) => {
   const { name, description } = req.body;
   try {
-    // Check if name already exists
+    // Verificar si el nombre ya existe
     const existingCategory = await prisma.category.findUnique({
       where: { name }
     });
     if (existingCategory) {
-      return res.status(400).json({ error: 'Category name already exists' });
+      return res.status(400).json({ error: 'El nombre de la categoría ya existe' });
     }
 
-    // Find the max ID and set next ID
+    // Encontrar el ID máximo y asignar el siguiente ID
     const maxIdResult = await prisma.category.findFirst({
       orderBy: { id: 'desc' },
       select: { id: true }
@@ -48,7 +48,7 @@ export const createCategory = async (req: Request, res: Response) => {
     });
     res.status(201).json(category);
   } catch (error) {
-    res.status(500).json({ error: 'Error creating category' });
+    res.status(500).json({ error: 'Error al crear la categoría' });
   }
 };
 
@@ -56,12 +56,12 @@ export const updateCategory = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { name, description } = req.body;
   try {
-    // Check if name already exists for another category
+    // Verificar si el nombre ya existe para otra categoría
     const existingCategory = await prisma.category.findFirst({
       where: { name, id: { not: parseInt(id) } }
     });
     if (existingCategory) {
-      return res.status(400).json({ error: 'Category name already exists' });
+      return res.status(400).json({ error: 'El nombre de la categoría ya existe' });
     }
 
     const category = await prisma.category.update({
@@ -70,24 +70,24 @@ export const updateCategory = async (req: Request, res: Response) => {
     });
     res.json(category);
   } catch (error) {
-    res.status(500).json({ error: 'Error updating category' });
+    res.status(500).json({ error: 'Error al actualizar la categoría' });
   }
 };
 
 export const deleteCategory = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    // Check if category has products
+    // Verificar si la categoría tiene productos
     const categoryWithProducts = await prisma.category.findUnique({
       where: { id: parseInt(id) },
       include: { product: true }
     });
 
     if (!categoryWithProducts) {
-      return res.status(404).json({ error: 'Category not found' });
+      return res.status(404).json({ error: 'Categoría no encontrada' });
     }
 
-    // If has products, set their categoryId to null
+    // Si tiene productos, establecer su categoryId en null
     if (categoryWithProducts.product.length > 0) {
       await prisma.product.updateMany({
         where: { categoryId: parseInt(id) },
@@ -95,42 +95,42 @@ export const deleteCategory = async (req: Request, res: Response) => {
       });
     }
 
-    // Delete the category
+    // Eliminar la categoría
     await prisma.category.delete({
       where: { id: parseInt(id) }
     });
 
-    res.status(200).json({ message: 'Category deleted successfully' });
+    res.status(200).json({ message: 'Categoría eliminada correctamente' });
   } catch (error) {
-    res.status(500).json({ error: 'Error deleting category' });
+    res.status(500).json({ error: 'Error al eliminar la categoría' });
   }
 };
 
 export const resetDatabase = async (req: Request, res: Response) => {
   try {
-    // Execute raw SQL to temporarily disable foreign key checks
+    // Ejecutar SQL bruto para desactivar temporalmente las comprobaciones de claves foráneas
     await prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 0;`;
 
-    // Delete all products and categories
+    // Eliminar todos los productos y categorías
     await prisma.product.deleteMany({});
     await prisma.category.deleteMany({});
 
-    // Reset auto-increment indexes
+    // Reiniciar los índices de auto-incremento
     await prisma.$executeRaw`ALTER TABLE product AUTO_INCREMENT = 1;`;
     await prisma.$executeRaw`ALTER TABLE category AUTO_INCREMENT = 1;`;
 
-    // Re-enable foreign key checks
+    // Volver a habilitar las comprobaciones de claves foráneas
     await prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 1;`;
 
-    res.status(200).json({ message: 'Database reset successfully' });
+    res.status(200).json({ message: 'Base de datos reiniciada correctamente' });
   } catch (error) {
-    console.error('Error resetting database:', error);
-    // Make sure to re-enable foreign key checks even if there's an error
+    console.error('Error al reiniciar la base de datos:', error);
+    // Asegurarse de volver a habilitar las claves foráneas incluso si hay un error
     try {
       await prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 1;`;
     } catch (fkError) {
-      console.error('Error re-enabling foreign key checks:', fkError);
+      console.error('Error al volver a habilitar las claves foráneas:', fkError);
     }
-    res.status(500).json({ error: 'Error resetting database' });
+    res.status(500).json({ error: 'Error al reiniciar la base de datos' });
   }
 };

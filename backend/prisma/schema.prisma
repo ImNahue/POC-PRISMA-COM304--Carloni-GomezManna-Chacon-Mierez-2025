@@ -9,7 +9,7 @@ datasource db {
 }
 
 model category {
-  id          Int       @id
+  id          Int       @id @default(autoincrement())
   name        String    @unique
   description String?
   createdAt   DateTime  @default(now())
@@ -30,3 +30,5 @@ model product {
 
   @@index([categoryId], map: "Product_categoryId_fkey")
 }
+
+

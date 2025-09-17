@@ -16,13 +16,13 @@ export const getProducts = async (req: Request, res: Response) => {
   if (minPrice) filters.price = { gte: parseFloat(minPrice as string) };
   if (maxPrice) filters.price = { ...filters.price, lte: parseFloat(maxPrice as string) };
 
-  // Handle inStock filter with three options
+  // Manejar filtro de stock con tres opciones
   if (inStock === 'true') {
-    filters.stock = { gt: 0 }; // In stock (stock > 0)
+    filters.stock = { gt: 0 }; // En stock (stock > 0)
   } else if (inStock === 'false') {
-    filters.stock = { equals: 0 }; // Out of stock (stock = 0)
+    filters.stock = { equals: 0 }; // Sin stock (stock = 0)
   }
-  // If inStock is not provided or empty, show all products (no stock filter)
+  // Si inStock no se proporciona o está vacío, mostrar todos los productos (sin filtro de stock)
 
   try {
     const products = await prisma.product.findMany({
@@ -31,7 +31,7 @@ export const getProducts = async (req: Request, res: Response) => {
     });
     res.json(products);
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching products' });
+    res.status(500).json({ error: 'Error al obtener los productos' });
   }
 };
 
@@ -45,10 +45,10 @@ export const getProductById = async (req: Request, res: Response) => {
     if (product) {
       res.json(product);
     } else {
-      res.status(404).json({ error: 'Product not found' });
+      res.status(404).json({ error: 'Producto no encontrado' });
     }
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching product' });
+    res.status(500).json({ error: 'Error al obtener el producto' });
   }
 };
 
@@ -56,7 +56,7 @@ export const createProduct = async (req: Request, res: Response) => {
   const { name, description, price, stock, categoryId } = req.body;
 
   if (!name) {
-    return res.status(400).json({ error: 'Name is required' });
+    return res.status(400).json({ error: 'El nombre es obligatorio' });
   }
 
   const data: any = { name };
@@ -68,7 +68,7 @@ export const createProduct = async (req: Request, res: Response) => {
   if (price !== undefined && price !== '') {
     const parsedPrice = parseFloat(price);
     if (isNaN(parsedPrice)) {
-      return res.status(400).json({ error: 'Invalid price' });
+      return res.status(400).json({ error: 'Precio inválido' });
     }
     data.price = parsedPrice;
   }
@@ -76,7 +76,7 @@ export const createProduct = async (req: Request, res: Response) => {
   if (stock !== undefined && stock !== '') {
     const parsedStock = parseInt(stock);
     if (isNaN(parsedStock)) {
-      return res.status(400).json({ error: 'Invalid stock' });
+      return res.status(400).json({ error: 'Stock inválido' });
     }
     data.stock = parsedStock;
   }
@@ -87,7 +87,7 @@ export const createProduct = async (req: Request, res: Response) => {
     } else {
       const parsedCategoryId = parseInt(categoryId);
       if (isNaN(parsedCategoryId)) {
-        return res.status(400).json({ error: 'Invalid categoryId' });
+        return res.status(400).json({ error: 'categoryId inválido' });
       }
       data.categoryId = parsedCategoryId;
     }
@@ -100,7 +100,7 @@ export const createProduct = async (req: Request, res: Response) => {
     });
     res.status(201).json(product);
   } catch (error) {
-    res.status(500).json({ error: 'Error creating product' });
+    res.status(500).json({ error: 'Error al crear el producto' });
   }
 };
 
@@ -121,7 +121,7 @@ export const updateProduct = async (req: Request, res: Response) => {
   if (price !== undefined && price !== '') {
     const parsedPrice = parseFloat(price);
     if (isNaN(parsedPrice)) {
-      return res.status(400).json({ error: 'Invalid price' });
+      return res.status(400).json({ error: 'Precio inválido' });
     }
     data.price = parsedPrice;
   }
@@ -129,7 +129,7 @@ export const updateProduct = async (req: Request, res: Response) => {
   if (stock !== undefined && stock !== '') {
     const parsedStock = parseInt(stock);
     if (isNaN(parsedStock)) {
-      return res.status(400).json({ error: 'Invalid stock' });
+      return res.status(400).json({ error: 'Stock inválido' });
     }
     data.stock = parsedStock;
   }
@@ -140,14 +140,14 @@ export const updateProduct = async (req: Request, res: Response) => {
     } else {
       const parsedCategoryId = parseInt(categoryId);
       if (isNaN(parsedCategoryId)) {
-        return res.status(400).json({ error: 'Invalid categoryId' });
+        return res.status(400).json({ error: 'categoryId inválido' });
       }
       data.categoryId = parsedCategoryId;
     }
   }
 
   if (Object.keys(data).length === 0) {
-    return res.status(400).json({ error: 'No valid fields provided for update' });
+    return res.status(400).json({ error: 'No se proporcionaron campos válidos para actualizar' });
   }
 
   try {
@@ -158,7 +158,7 @@ export const updateProduct = async (req: Request, res: Response) => {
     });
     res.json(product);
   } catch (error) {
-    res.status(500).json({ error: 'Error updating product' });
+    res.status(500).json({ error: 'Error al actualizar el producto' });
   }
 };
 
@@ -170,11 +170,11 @@ export const deleteProduct = async (req: Request, res: Response) => {
     });
     res.status(204).send();
   } catch (error) {
-    res.status(500).json({ error: 'Error deleting product' });
+    res.status(500).json({ error: 'Error al eliminar el producto' });
   }
 };
 
-// Special queries
+// Consultas especiales
 export const getProductsByCategory = async (req: Request, res: Response) => {
   const { categoryId } = req.params;
   try {
@@ -184,7 +184,7 @@ export const getProductsByCategory = async (req: Request, res: Response) => {
     });
     res.json(products);
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching products by category' });
+    res.status(500).json({ error: 'Error al obtener productos por categoría' });
   }
 };
 
@@ -196,24 +196,24 @@ export const getOutOfStockProducts = async (req: Request, res: Response) => {
     });
     res.json(products);
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching out of stock products' });
+    res.status(500).json({ error: 'Error al obtener productos sin stock' });
   }
 };
 
 export const getExpensiveProducts = async (req: Request, res: Response) => {
   try {
     const products = await prisma.product.findMany({
-      where: { price: { gt: 100 } }, // Products more expensive than 100
+      where: { price: { gt: 100 } }, // Productos con precio mayor a 100
       include: { category: true },
       orderBy: { price: 'desc' }
     });
     res.json(products);
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching expensive products' });
+    res.status(500).json({ error: 'Error al obtener productos caros' });
   }
 };
 
-// Bulk operations
+// Operaciones masivas
 export const bulkDeleteProducts = async (req: Request, res: Response) => {
   const { productIds } = req.body;
 
