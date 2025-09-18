@@ -8,10 +8,10 @@ const ProductForm: React.FC = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [product, setProduct] = useState<Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'category'>>({
+  const [product, setProduct] = useState<Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'category' | 'price'> & { price: string }>({
     name: '',
     description: '',
-    price: 0,
+    price: '',
     stock: 0,
     categoryId: 0
   });
@@ -42,7 +42,7 @@ const ProductForm: React.FC = () => {
       setProduct({
         name: response.data.name,
         description: response.data.description || '',
-        price: response.data.price,
+        price: response.data.price.toString(),
         stock: response.data.stock,
         categoryId: response.data.categoryId
       });
@@ -55,7 +55,7 @@ const ProductForm: React.FC = () => {
     const { name, value } = e.target;
     setProduct(prev => ({
       ...prev,
-      [name]: name === 'price' || name === 'stock' || name === 'categoryId' ? parseFloat(value) || 0 : value
+      [name]: name === 'stock' || name === 'categoryId' ? parseFloat(value) || 0 : name === 'price' ? value : value
     }));
   };
 
@@ -63,10 +63,11 @@ const ProductForm: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      const productToSend = { ...product, price: parseFloat(product.price) || 0 };
       if (id) {
-        await updateProduct(parseInt(id), product);
+        await updateProduct(parseInt(id), productToSend);
       } else {
-        await createProduct(product);
+        await createProduct(productToSend);
       }
       navigate('/');
     } catch (error) {
