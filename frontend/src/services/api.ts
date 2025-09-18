@@ -1,4 +1,7 @@
+/// <reference types="node" />
 import axios from 'axios';
+
+declare const process: any;
 
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3000/api',
