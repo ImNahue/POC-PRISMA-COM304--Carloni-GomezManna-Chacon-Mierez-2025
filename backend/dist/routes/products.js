@@ -12,5 +12,7 @@ router.delete('/:id', products_1.deleteProduct);
 router.get('/category/:categoryId', products_1.getProductsByCategory);
 router.get('/out-of-stock', products_1.getOutOfStockProducts);
 router.get('/expensive', products_1.getExpensiveProducts);
+// Bulk operations routes
+router.post('/bulk-delete', products_1.bulkDeleteProducts);
 exports.default = router;
 //# sourceMappingURL=products.js.map

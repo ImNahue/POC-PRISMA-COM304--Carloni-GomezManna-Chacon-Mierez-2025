@@ -2,9 +2,10 @@
   "name": "backend",
   "version": "1.0.0",
   "scripts": {
-    "dev": "ts-node src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js",
+  "dev": "ts-node src/server.ts",
+  "build": "tsc",
+  "vercel-build": "tsc --outDir dist",
+  "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
@@ -13,6 +14,7 @@
 
   "dependencies": {
     "@prisma/client": "^5.0.0",
+  "serverless-http": "^3.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^4.18.2"
