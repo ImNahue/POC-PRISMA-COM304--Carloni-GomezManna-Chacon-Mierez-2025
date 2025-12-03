@@ -1,8 +1,16 @@
 {
+  "scripts": {
+  "build": "cd frontend && npm install && npm run build && cd ../backend && npm install && npx prisma generate && npm run vercel-build",
+  "vercel-build": "npm run build"
+  },
   "devDependencies": {
     "prisma": "^6.16.2"
   },
   "dependencies": {
     "@prisma/client": "^6.16.2"
+  }
+  ,
+  "optionalDependencies": {
+    "serverless-http": "^3.0.0"
   }
 }

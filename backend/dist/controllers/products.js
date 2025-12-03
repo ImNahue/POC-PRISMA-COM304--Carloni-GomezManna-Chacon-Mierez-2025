@@ -1,19 +1,29 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getExpensiveProducts = exports.getOutOfStockProducts = exports.getProductsByCategory = exports.deleteProduct = exports.updateProduct = exports.createProduct = exports.getProductById = exports.getProducts = void 0;
+exports.bulkDeleteProducts = exports.getExpensiveProducts = exports.getOutOfStockProducts = exports.getProductsByCategory = exports.deleteProduct = exports.updateProduct = exports.createProduct = exports.getProductById = exports.getProducts = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getProducts = async (req, res) => {
     const { category, minPrice, maxPrice, inStock } = req.query;
     const filters = {};
-    if (category)
+    if (category === 'none') {
+        filters.categoryId = null;
+    }
+    else if (category) {
         filters.categoryId = parseInt(category);
+    }
     if (minPrice)
         filters.price = { gte: parseFloat(minPrice) };
     if (maxPrice)
         filters.price = { ...filters.price, lte: parseFloat(maxPrice) };
-    if (inStock === 'true')
-        filters.stock = { gt: 0 };
+    // Manejar filtro de stock con tres opciones
+    if (inStock === 'true') {
+        filters.stock = { gt: 0 }; // En stock (stock > 0)
+    }
+    else if (inStock === 'false') {
+        filters.stock = { equals: 0 }; // Sin stock (stock = 0)
+    }
+    // Si inStock no se proporciona o está vacío, mostrar todos los productos (sin filtro de stock)
     try {
         const products = await prisma.product.findMany({
             where: filters,
@@ -22,7 +32,7 @@ const getProducts = async (req, res) => {
         res.json(products);
     }
     catch (error) {
-        res.status(500).json({ error: 'Error fetching products' });
+        res.status(500).json({ error: 'Error al obtener los productos' });
     }
 };
 exports.getProducts = getProducts;
@@ -37,53 +47,110 @@ const getProductById = async (req, res) => {
             res.json(product);
         }
         else {
-            res.status(404).json({ error: 'Product not found' });
+            res.status(404).json({ error: 'Producto no encontrado' });
         }
     }
     catch (error) {
-        res.status(500).json({ error: 'Error fetching product' });
+        res.status(500).json({ error: 'Error al obtener el producto' });
     }
 };
 exports.getProductById = getProductById;
 const createProduct = async (req, res) => {
     const { name, description, price, stock, categoryId } = req.body;
+    if (!name) {
+        return res.status(400).json({ error: 'El nombre es obligatorio' });
+    }
+    const data = { name };
+    if (description !== undefined) {
+        data.description = description;
+    }
+    if (price !== undefined && price !== '') {
+        const parsedPrice = parseFloat(price);
+        if (isNaN(parsedPrice)) {
+            return res.status(400).json({ error: 'Precio inválido' });
+        }
+        data.price = parsedPrice;
+    }
+    if (stock !== undefined && stock !== '') {
+        const parsedStock = parseInt(stock);
+        if (isNaN(parsedStock)) {
+            return res.status(400).json({ error: 'Stock inválido' });
+        }
+        data.stock = parsedStock;
+    }
+    if (categoryId !== undefined && categoryId !== '') {
+        if (categoryId === 'none') {
+            data.categoryId = null;
+        }
+        else {
+            const parsedCategoryId = parseInt(categoryId);
+            if (isNaN(parsedCategoryId)) {
+                return res.status(400).json({ error: 'categoryId inválido' });
+            }
+            data.categoryId = parsedCategoryId;
+        }
+    }
     try {
         const product = await prisma.product.create({
-            data: {
-                name,
-                description,
-                price: parseFloat(price),
-                stock: parseInt(stock),
-                categoryId: parseInt(categoryId)
-            },
+            data,
             include: { category: true }
         });
         res.status(201).json(product);
     }
     catch (error) {
-        res.status(500).json({ error: 'Error creating product' });
+        res.status(500).json({ error: 'Error al crear el producto' });
     }
 };
 exports.createProduct = createProduct;
 const updateProduct = async (req, res) => {
     const { id } = req.params;
     const { name, description, price, stock, categoryId } = req.body;
+    const data = {};
+    if (name !== undefined && name !== '') {
+        data.name = name;
+    }
+    if (description !== undefined) {
+        data.description = description;
+    }
+    if (price !== undefined && price !== '') {
+        const parsedPrice = parseFloat(price);
+        if (isNaN(parsedPrice)) {
+            return res.status(400).json({ error: 'Precio inválido' });
+        }
+        data.price = parsedPrice;
+    }
+    if (stock !== undefined && stock !== '') {
+        const parsedStock = parseInt(stock);
+        if (isNaN(parsedStock)) {
+            return res.status(400).json({ error: 'Stock inválido' });
+        }
+        data.stock = parsedStock;
+    }
+    if (categoryId !== undefined && categoryId !== '') {
+        if (categoryId === 'none') {
+            data.categoryId = null;
+        }
+        else {
+            const parsedCategoryId = parseInt(categoryId);
+            if (isNaN(parsedCategoryId)) {
+                return res.status(400).json({ error: 'categoryId inválido' });
+            }
+            data.categoryId = parsedCategoryId;
+        }
+    }
+    if (Object.keys(data).length === 0) {
+        return res.status(400).json({ error: 'No se proporcionaron campos válidos para actualizar' });
+    }
     try {
         const product = await prisma.product.update({
             where: { id: parseInt(id) },
-            data: {
-                name,
-                description,
-                price: parseFloat(price),
-                stock: parseInt(stock),
-                categoryId: parseInt(categoryId)
-            },
+            data,
             include: { category: true }
         });
         res.json(product);
     }
     catch (error) {
-        res.status(500).json({ error: 'Error updating product' });
+        res.status(500).json({ error: 'Error al actualizar el producto' });
     }
 };
 exports.updateProduct = updateProduct;
@@ -96,11 +163,11 @@ const deleteProduct = async (req, res) => {
         res.status(204).send();
     }
     catch (error) {
-        res.status(500).json({ error: 'Error deleting product' });
+        res.status(500).json({ error: 'Error al eliminar el producto' });
     }
 };
 exports.deleteProduct = deleteProduct;
-// Special queries
+// Consultas especiales
 const getProductsByCategory = async (req, res) => {
     const { categoryId } = req.params;
     try {
@@ -111,7 +178,7 @@ const getProductsByCategory = async (req, res) => {
         res.json(products);
     }
     catch (error) {
-        res.status(500).json({ error: 'Error fetching products by category' });
+        res.status(500).json({ error: 'Error al obtener productos por categoría' });
     }
 };
 exports.getProductsByCategory = getProductsByCategory;
@@ -124,22 +191,46 @@ const getOutOfStockProducts = async (req, res) => {
         res.json(products);
     }
     catch (error) {
-        res.status(500).json({ error: 'Error fetching out of stock products' });
+        res.status(500).json({ error: 'Error al obtener productos sin stock' });
     }
 };
 exports.getOutOfStockProducts = getOutOfStockProducts;
 const getExpensiveProducts = async (req, res) => {
     try {
         const products = await prisma.product.findMany({
-            where: { price: { gt: 100 } }, // Products more expensive than 100
+            where: { price: { gt: 100 } }, // Productos con precio mayor a 100
             include: { category: true },
             orderBy: { price: 'desc' }
         });
         res.json(products);
     }
     catch (error) {
-        res.status(500).json({ error: 'Error fetching expensive products' });
+        res.status(500).json({ error: 'Error al obtener productos caros' });
     }
 };
 exports.getExpensiveProducts = getExpensiveProducts;
+// Operaciones masivas
+const bulkDeleteProducts = async (req, res) => {
+    const { productIds } = req.body;
+    if (!Array.isArray(productIds) || productIds.length === 0) {
+        return res.status(400).json({ error: 'Se requieren IDs de productos válidos' });
+    }
+    try {
+        const result = await prisma.product.deleteMany({
+            where: {
+                id: {
+                    in: productIds.map((id) => parseInt(id))
+                }
+            }
+        });
+        res.json({
+            message: `${result.count} producto(s) eliminado(s) correctamente`,
+            deletedCount: result.count
+        });
+    }
+    catch (error) {
+        res.status(500).json({ error: 'Error eliminando productos' });
+    }
+};
+exports.bulkDeleteProducts = bulkDeleteProducts;
 //# sourceMappingURL=products.js.map
